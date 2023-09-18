@@ -1,0 +1,62 @@
+<html lang="ja">
+
+<head>
+    <title>VideoPlayer</title>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://vjs.zencdn.net/8.5.2/video-js.css">
+    <style>
+    </style>
+</head>
+
+<body>
+    <!-- <video-js id=videoPlayer class="vjs-fluid  vjs-default-skin vjs-big-play-centered mx-auto" width=640 height=360></video-js> -->
+    <button onclick="btnclick()">test</button>
+    <button onclick="btnclick2()">test2</button>
+    <div id="video"></div>
+    <script src="https://vjs.zencdn.net/8.5.2/video.js"></script>
+    <script>
+        var videoEl = document.getElementById('video');
+        var player = null;
+        function btnclick() {
+            fetch("http://localhost:8181/m3u8.php?type=1")
+                .then((response) => response.json())
+                .then((data) => initPlayer(data.src));
+        }
+        function btnclick2() {
+            fetch("http://localhost:8181/m3u8.php?type=2")
+                .then((response) => response.json())
+                .then((data) => initPlayer(data.src));
+        }
+
+        function initPlayer(src) {
+            if (player) {
+                player.dispose();
+            }
+            var playerEl = document.createElement("video-js");
+            playerEl.setAttribute("id", "videoPlayer");
+            playerEl.setAttribute("width","640");
+            playerEl.setAttribute("height","360");
+            playerEl.classList.add("vjs-fluid", "vjs-default-skin", "vjs-big-play-centered", "mx-aut");
+            videoEl.appendChild(playerEl);
+
+            player = videojs('videoPlayer', {
+                autoplay      : true,
+                loop          : false,
+                controls      : true,
+                preload       : 'auto',
+                playbackRates : [0.5, 1, 1.5, 2]
+            });
+            player.requestFullscreen();
+            player.src({
+                type: "application/x-mpegURL",
+                src: src
+                // type: "application/dash+xml",
+                // src: "https://livesim.dashif.org/livesim/chunkdur_1/ato_7/testpic4_8s/Manifest.mpd"
+            });
+        }
+    </script>
+</body>
+</html>
