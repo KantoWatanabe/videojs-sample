@@ -1,0 +1,162 @@
+<html lang="ja">
+
+<head>
+    <title>VideoPlayer</title>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://vjs.zencdn.net/8.5.2/video-js.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/videojs-overlay@3.1.0/dist/videojs-overlay.min.css" rel="stylesheet">
+    <style>
+        #overlay {
+            position: absolute; 
+            top: 100px; 
+            color: #FFF; 
+            text-align: center;
+            font-size: 20px;
+            background-color: rgba(221, 221, 221, 0.3);
+            width: 640px;
+            padding: 10px 0;
+            z-index: 2147483647;
+        }
+
+        #videoPlayer {
+            z-index: 1;
+        }
+
+        .box {
+            display: flex;
+            width: 380px;
+            height: 240px;
+            overflow-x: scroll;
+        }
+        
+        .box div {
+            width: 90%;
+            margin: 5px;
+            flex-shrink: 0;
+        }
+
+        .box::-webkit-scrollbar {
+            height: 14px; /* スクロールバーの高さ */
+        }
+            
+        .box::-webkit-scrollbar-thumb {
+            background: #d2b48c; /* ツマミの色 */
+            border-radius: 7px; /* ツマミ両端の丸み */
+        }
+            
+        .box::-webkit-scrollbar-track {
+            background: #f5deb3; /* トラックの色 */
+            border-radius: 7px; /* トラック両端の丸み */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <video-js id=videoPlayer class="vjs-fluid  vjs-default-skin vjs-big-play-centered mx-auto" width=640 height=360></video-js> -->
+    <button onclick="btnclick()">test</button>
+    <button onclick="btnclick2()">test2</button>
+    <button onclick="overlay1()">videojs-overlayライブラリを使う</button>
+    <button onclick="overlay2()">自力でスタイル適用</button><span>フルスクリーンでの表示がうまくいかない</span>
+    <button onclick="overlay3()">videojs標準のモーダルを利用する</button>
+
+    <div id="video">
+    </div>
+    <script src="https://vjs.zencdn.net/8.5.2/video.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-overlay@3.1.0/dist/videojs-overlay.min.js"></script>
+    <script>
+        var videoEl = document.getElementById('video');
+        var player = null;
+        initPlayer();
+        function btnclick() {
+            fetch("http://localhost:8181/m3u8.php?type=1")
+                .then((response) => response.json())
+                .then((data) => play(data.src));
+        }
+        function btnclick2() {
+            fetch("http://localhost:8181/m3u8.php?type=2")
+                .then((response) => response.json())
+                .then((data) => play(data.src));
+        }
+
+        function overlay1() {
+            const overlay = player.overlay({
+                content: '<p>Default overlay content</p>',
+                //debug: true,
+                overlays: [{
+                    content: '<p>The video is playing!</p>',
+                    start: 'play',
+                    end: 'pause'
+                }]
+            });
+            const addedOverlays = overlay.add({content: "this is a new one", start: "play", end: "pause"});
+        }
+        function overlay2() {
+            var overlayEl = document.createElement("div");
+            overlayEl.setAttribute("id", "overlay");
+            overlayEl.innerText = 'This is HTML overlay on top of the video! ';
+            videoEl.appendChild(overlayEl);
+        }
+        function overlay3() {
+            //var modal = player.createModal('This is a modal!');
+            options = {};
+            //options.content = 'In the  modal';
+            //options.content = videojs.dom.createEl("p", {}, {class: "test"}, "In the  modal");
+            boxEl = videojs.dom.createEl("div", {}, {class: "box"}, '');
+            item1El = videojs.dom.createEl("div", {}, {style: "background:#ff6347;"}, '');
+            item2El = videojs.dom.createEl("div", {}, {style: "background:#008080;"}, '');
+            item3El = videojs.dom.createEl("div", {}, {style: "background:#4169e1;"}, '');
+            boxEl.appendChild(item1El);
+            boxEl.appendChild(item2El);
+            boxEl.appendChild(item3El);
+            options.content = boxEl;
+
+            //options.label = 'the label';
+
+            var ModalDialog = videojs.getComponent('ModalDialog');
+            var modal = new ModalDialog(player, options);
+            player.addChild(modal);
+
+            // When the modal closes, resume playback.
+            modal.on('modalclose', function() {
+                player.play();
+            });
+            modal.open();
+        }
+
+        function initPlayer() {
+            //if (player) {
+            //    player.dispose();
+            //}
+            var playerEl = document.createElement("video-js");
+            playerEl.setAttribute("id", "videoPlayer");
+            playerEl.setAttribute("width","640");
+            playerEl.setAttribute("height","360");
+            playerEl.classList.add("vjs-fluid", "vjs-default-skin", "vjs-big-play-centered", "mx-aut");
+            videoEl.appendChild(playerEl);
+
+            player = videojs('videoPlayer', {
+                autoplay      : true,
+                loop          : false,
+                controls      : true,
+                preload       : 'auto',
+                playbackRates : [0.5, 1, 1.5, 2]
+            });
+        }
+
+        function play(src) {
+            if (!player) return;
+            player.requestFullscreen();
+            player.src({
+                type: "application/x-mpegURL",
+                src: src
+                // type: "application/dash+xml",
+                // src: "https://livesim.dashif.org/livesim/chunkdur_1/ato_7/testpic4_8s/Manifest.mpd"
+            });
+        }
+    </script>
+</body>
+</html>
