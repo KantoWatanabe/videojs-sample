@@ -12,6 +12,8 @@
 <body>
     <video-js id=videoPlayer class="vjs-fluid  vjs-default-skin vjs-big-play-centered mx-auto" width=640 height=360></video-js>
     <button onclick="btnclick()">test</button>
+    <button onclick="showcontrol()">コントロールバーを表示</button>
+    <button onclick="hidecontrol()">コントロールバーを非表示</button>
     <script src="https://vjs.zencdn.net/7.4.1/video.js"></script>
     <script>
 
@@ -32,6 +34,15 @@
                 // src: "https://livesim.dashif.org/livesim/chunkdur_1/ato_7/testpic4_8s/Manifest.mpd"
             });
             //player.play();
+        }
+
+        function showcontrol() {
+            player.pause(); // pauseしないと表示されない
+            player.controlBar.show();
+        }
+
+        function hidecontrol() {
+            player.controlBar.hide();
         }
 
         var player = videojs('videoPlayer', {
