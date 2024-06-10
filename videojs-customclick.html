@@ -1,0 +1,124 @@
+<html lang="ja">
+
+<head>
+    <title>VideoPlayer</title>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://vjs.zencdn.net/7.20.2/video-js.css">
+</head>
+
+<body>
+    <video-js id=videoPlayer class="vjs-fluid  vjs-default-skin vjs-big-play-centered mx-auto" width=640 height=360></video-js>
+    <button onclick="btnclick()">test</button>
+    <button onclick="showcontrol()">コントロールバーを表示</button>
+    <button onclick="hidecontrol()">コントロールバーを非表示</button>
+    <script src="https://vjs.zencdn.net/7.20.2/video.js"></script>
+    <script>
+
+        function btnclick() {
+            /*
+            if (player.isFullscreen()) {
+                player.exitFullscreen();
+            } else {
+                player.requestFullscreen();
+            }
+            */
+            console.log(player.isFullscreen());
+            player.requestFullscreen();
+            player.src({
+                type: "application/x-mpegURL",
+                src: "https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8"
+            });
+            //player.play();
+        }
+
+        function showcontrol() {
+            player.pause(); // pauseしないと表示されない
+            player.controlBar.show();
+        }
+
+        function hidecontrol() {
+            player.controlBar.hide();
+        }
+
+        var clickHandler = (event) => {
+            console.log("click");
+        };
+        var doubleClickHandler = (event) => {
+            console.log("doubleClick");
+        };
+        var clicked = false;  
+        clickHandler2 = (e) => {
+            if (clicked) {
+                //alert("double click!!");
+                if (player.isFullscreen()) {
+                    player.exitFullscreen();
+                } else {
+                    player.requestFullscreen();
+                }
+                clicked = false;
+                return;
+            }
+
+            // シングルクリックを受理、300ms間だけダブルクリック判定を残す
+            clicked = true;
+            setTimeout(function () {
+                // ダブルクリックによりclickedフラグがリセットされていない
+                //     -> シングルクリックだった
+                if (clicked) {
+                    //alert("single click!");
+                    if (player.paused()) {
+                        player.play();
+                    } else {
+                        player.pause();
+                    }
+                }
+
+                clicked = false;
+            }, 300);
+        }
+        //player.on('click', clickHandler2);
+        var player = videojs('videoPlayer', {
+            userActions: {
+                click: clickHandler2,
+                doubleClick: false,
+                hotkeys: function(event) {
+                    console.log(event.which);
+                }
+            },
+            autoplay      : true,
+            loop          : false,
+            controls      : true,
+            preload       : 'auto',
+            playbackRates : [0.5, 1, 1.5, 2],
+ 
+        });
+
+        player.on(['loadstart', 'loadedmetadata', 'loadeddata', 'play', 'playing', 'pause', 'suspend', 'seeking', 'seeked', 'waiting', 'canplay', 'canplaythrough', 'ratechange', 'ended', 'emptied', 'error', 'abort'], (e) => {
+            console.log(`Player Event : ${e.type}`);
+        });
+        player.on('play', (e) => {
+            //player.requestFullscreen();
+        });
+        player.on('loadedmetadata', (e) => {
+        });
+        player.bigPlayButton.on('click', function(){
+            // do the action        
+            //player.requestFullscreen();
+            player.src({
+                type: "application/x-mpegURL",
+                src: "https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8"
+                //src: "https://yomitvhls-livepush.video.llnw.net/naruohama/master.m3u8?e=1716775817&h=0b9991841317c07e2c8cc021a8134be8",
+                // type: "application/dash+xml",
+                // src: "https://livesim.dashif.org/livesim/chunkdur_1/ato_7/testpic4_8s/Manifest.mpd"
+            });
+        });
+
+        player.ready(() => {
+            console.log("ready")
+        });
+    </script>
+</body>
+</html>
